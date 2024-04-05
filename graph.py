@@ -99,7 +99,7 @@ ax.bar(
     data.magnitudes,
     width=0.0075,
     alpha=0.5,
-    color=np.where(data.magnitudes >= 5.5, 'r', np.where(data.magnitudes < 4, 'b', 'g')))
+    color=np.where(data.magnitudes >= 5, 'r', np.where(data.magnitudes < 4, 'b', 'g')))
 ax.set_xlabel("Time")
 ax.set_ylabel("Magnitude")
 plt.savefig(Path("./outputs/mag_t.png"))
