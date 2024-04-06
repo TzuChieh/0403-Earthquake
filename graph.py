@@ -34,6 +34,12 @@ class EarthquakeData:
         for time in self.times:
             self.counts.append(self.count(time - half_hours, time + half_hours) / avg_hours)
 
+        # Calculate energy release amount in time slot
+        self.summed_magnitudes = []
+        for time in self.times:
+            e = self.energy(time - half_hours, time + half_hours)
+            self.summed_magnitudes.append(energy_to_magnitude(e))
+
         # Calculate cumulative energy release amount
         total_energy = 0.0
         self.cumulative_magnitudes = []
@@ -47,6 +53,13 @@ class EarthquakeData:
             if time >= begin_time and time < end_time:
                 count += 1
         return count
+    
+    def energy(self, begin_time, end_time):
+        e = 0.0
+        for i, time in enumerate(self.times):
+            if time >= begin_time and time < end_time:
+                e += magnitude_to_energy(self.magnitudes[i])
+        return e
 
 
 def read_data(file_name, begin_time, end_time):
@@ -89,7 +102,7 @@ matplotlib.use('Agg')
 # Creates output directory (this won't be tracked)
 Path("./outputs/").mkdir(parents=True, exist_ok=True)
 
-data = read_data("data/20240406_0018.csv", "2024-04-03 07:58:00", "2025-04-03 07:58:00")
+data = read_data("data/20240406_1640.csv", "2024-04-03 07:58:00", "2025-04-03 07:58:00")
 data.process()
 
 fig = plt.figure(figsize=(12, 5))
@@ -119,10 +132,20 @@ fig = plt.figure(figsize=(12, 5))
 ax = fig.add_subplot()
 ax.plot(
     data.times, 
+    data.summed_magnitudes)
+ax.set_xlabel("Time")
+ax.set_ylabel("Energy Release")
+plt.savefig(Path("./outputs/summed_energy_t.png"))
+plt.clf()
+
+fig = plt.figure(figsize=(12, 5))
+ax = fig.add_subplot()
+ax.plot(
+    data.times, 
     data.cumulative_magnitudes)
 ax.set_xlabel("Time")
 ax.set_ylabel("Cumulative Energy")
-plt.savefig(Path("./outputs/energy_t.png"))
+plt.savefig(Path("./outputs/cumulative_energy_t.png"))
 plt.clf()
 
 fig = plt.figure(figsize=(12, 12))
