@@ -11,10 +11,8 @@ import numpy as np
 def magnitude_to_energy(magnitude):
     return 10.0 ** (4.8 + 1.5 * magnitude)
 
-
 def energy_to_magnitude(energy):
     return (np.log10(energy) - 4.8) / 1.5
-
 
 class EarthquakeData:
     def __init__(self):
@@ -61,7 +59,6 @@ class EarthquakeData:
                 e += magnitude_to_energy(self.magnitudes[i])
         return e
 
-
 def read_data(file_name, begin_time, end_time):
     time_format = '%Y-%m-%d %H:%M:%S'
     begin_time = datetime.strptime(begin_time, time_format)
@@ -102,7 +99,7 @@ matplotlib.use('Agg')
 # Creates output directory (this won't be tracked)
 Path("./outputs/").mkdir(parents=True, exist_ok=True)
 
-data = read_data("data/20240407_1710.csv", "2024-04-03 07:58:00", "2025-04-03 07:58:00")
+data = read_data("data/20240408_0212.csv", "2024-04-03 07:58:00", "2025-04-03 07:58:00")
 data.process()
 
 fig = plt.figure(figsize=(12, 5))

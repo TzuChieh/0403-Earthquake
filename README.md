@@ -4,7 +4,7 @@
 
 ## 資料作圖 / Visualizations
 
-芮氏地震規模與發生時間 (紅: 規模 > 5，綠: 4 <= 規模 < 5，藍: 規模 < 4)；Earthquake magnitudes (ML) over time (red: ML >= 5, green: 4 <= ML < 5, blue: ML < 4):
+芮氏地震規模與發生時間 (紅: 規模 >= 5，綠: 4 <= 規模 < 5，藍: 規模 < 4)；Earthquake magnitudes (ML) over time (red: ML >= 5, green: 4 <= ML < 5, blue: ML < 4):
 
 ![magnitudes over time](images/mag_t.png)
 
