@@ -114,6 +114,7 @@ ax.bar(
     color=np.where(data.magnitudes >= 5, 'r', np.where(data.magnitudes < 4, 'b', 'g')))
 ax.set_xlabel("Time")
 ax.set_ylabel("Magnitude")
+ax.grid()
 plt.savefig(Path("./outputs/mag_t.png"))
 plt.clf()
 
@@ -124,6 +125,7 @@ ax.plot(
     data.counts)
 ax.set_xlabel("Time")
 ax.set_ylabel("Counts (4 hours mean)")
+ax.grid()
 plt.savefig(Path("./outputs/count_t.png"))
 plt.clf()
 
@@ -138,6 +140,7 @@ ax.set_ylabel("Counts (4 hours mean, log scale)")
 ax.set_xscale('log', base=10)
 ax.set_yscale('log', base=10)
 ax.set_xlim(2.0)
+ax.grid()
 plt.savefig(Path("./outputs/count_t_flog.png"))
 plt.clf()
 
@@ -148,6 +151,7 @@ ax.plot(
     data.summed_magnitudes)
 ax.set_xlabel("Time")
 ax.set_ylabel("Energy Release")
+ax.grid()
 plt.savefig(Path("./outputs/summed_energy_t.png"))
 plt.clf()
 
@@ -158,6 +162,7 @@ ax.plot(
     data.cumulative_magnitudes)
 ax.set_xlabel("Time")
 ax.set_ylabel("Cumulative Energy")
+ax.grid()
 plt.savefig(Path("./outputs/cumulative_energy_t.png"))
 plt.clf()
 
