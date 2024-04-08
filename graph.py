@@ -8,6 +8,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+time_format = '%Y-%m-%d %H:%M:%S'
+mainshock_time = datetime.strptime("2024-04-03 07:58:09", time_format)
+
+# Use a non-interactive backend so plot window will not pop out
+matplotlib.use('Agg')
+
 def magnitude_to_energy(magnitude):
     return 10.0 ** (4.8 + 1.5 * magnitude)
 
@@ -60,7 +66,6 @@ class EarthquakeData:
         return e
 
 def read_data(file_name, begin_time, end_time):
-    time_format = '%Y-%m-%d %H:%M:%S'
     begin_time = datetime.strptime(begin_time, time_format)
     end_time = datetime.strptime(end_time, time_format)
     data = EarthquakeData()
@@ -93,9 +98,6 @@ def read_data(file_name, begin_time, end_time):
     return data
 
 
-# Use a non-interactive backend so plot window will not pop out
-matplotlib.use('Agg')
-
 # Creates output directory (this won't be tracked)
 Path("./outputs/").mkdir(parents=True, exist_ok=True)
 
@@ -123,6 +125,20 @@ ax.plot(
 ax.set_xlabel("Time")
 ax.set_ylabel("Counts (4 hours mean)")
 plt.savefig(Path("./outputs/count_t.png"))
+plt.clf()
+
+hours_after_mainshock = [(t - mainshock_time).total_seconds() / 3600.0 for t in data.times]
+fig = plt.figure(figsize=(12, 5))
+ax = fig.add_subplot()
+ax.plot(
+    hours_after_mainshock, 
+    data.counts)
+ax.set_xlabel("Hours after mainshock (log scale)")
+ax.set_ylabel("Counts (4 hours mean, log scale)")
+ax.set_xscale('log', base=10)
+ax.set_yscale('log', base=10)
+ax.set_xlim(2.0)
+plt.savefig(Path("./outputs/count_t_flog.png"))
 plt.clf()
 
 fig = plt.figure(figsize=(12, 5))

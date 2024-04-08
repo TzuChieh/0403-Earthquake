@@ -12,6 +12,10 @@
 
 ![counts over time](images/count_t.png)
 
+地震發生頻率 (4小時移動平均，全對數圖)；Earthquake frequency (running average over 4 hours, log scale):
+
+![counts over time log](images/count_t_flog.png)
+
 地震序列當下釋放能量 (芮氏規模相當，4小時累積)；Earthquake series energy release (ML equivalent, running average over 4 hours):
 
 ![energy release](images/summed_energy_t.png)
