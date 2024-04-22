@@ -101,7 +101,7 @@ def read_data(file_name, begin_time, end_time):
 # Creates output directory (this won't be tracked)
 Path("./outputs/").mkdir(parents=True, exist_ok=True)
 
-data = read_data("data/20240408_1336.csv", "2024-04-03 07:58:00", "2025-04-03 07:58:00")
+data = read_data("data/20240423_0605.csv", "2024-04-03 07:58:00", "2025-04-03 07:58:00")
 data.process()
 
 fig = plt.figure(figsize=(12, 5))
