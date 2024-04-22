@@ -31,6 +31,15 @@ class EarthquakeData:
         self.location_descriptions = []
 
     def process(self):
+        """
+        Process all data and store additional information. This method should be called only after all modifications
+        are done for the data.
+        """
+        self.longitudes = np.array(self.longitudes)
+        self.latitudes = np.array(self.latitudes)
+        self.magnitudes = np.array(self.magnitudes)
+        self.depths = np.array(self.depths)
+
         # Calculate running average of earthquake counts
         avg_hours = 4.0
         half_hours = timedelta(hours=avg_hours / 2)
@@ -52,6 +61,9 @@ class EarthquakeData:
             self.cumulative_magnitudes.insert(0, energy_to_magnitude(total_energy))
 
     def count(self, begin_time, end_time):
+        """
+        @return Number of earthquakes in the specified time range.
+        """
         count = 0
         for time in self.times:
             if time >= begin_time and time < end_time:
@@ -59,11 +71,40 @@ class EarthquakeData:
         return count
     
     def energy(self, begin_time, end_time):
+        """
+        @return Total energy in the specified time range.
+        """
         e = 0.0
         for i, time in enumerate(self.times):
             if time >= begin_time and time < end_time:
                 e += magnitude_to_energy(self.magnitudes[i])
         return e
+    
+    def remove_entries_by(self, longitude_range=(0.0, 0.0), latitude_range=(0.0, 0.0)):
+        for i in reversed(range(0, len(self.names))):
+            long, lat = (self.longitudes[i], self.latitudes[i])
+            if (longitude_range[0] <= long and long < longitude_range[1] and
+                latitude_range[0] <= lat and lat < latitude_range[1]):
+                self.remove_entry(i)
+    
+    def add_entry(self, name, time, longitude, latitude, magnitude, depth, location_description):
+        self.names.append(name)
+        self.times.append(time)
+        self.longitudes.append(longitude)
+        self.latitudes.append(latitude)
+        self.magnitudes.append(magnitude)
+        self.depths.append(depth)
+        self.location_descriptions.append(location_description)
+
+    def remove_entry(self, idx):
+        del self.names[idx]
+        del self.times[idx]
+        del self.longitudes[idx]
+        del self.latitudes[idx]
+        del self.magnitudes[idx]
+        del self.depths[idx]
+        del self.location_descriptions[idx]
+
 
 def read_data(file_name, begin_time, end_time):
     begin_time = datetime.strptime(begin_time, time_format)
@@ -82,19 +123,15 @@ def read_data(file_name, begin_time, end_time):
             if time < begin_time or time > end_time:
                 continue
 
-            data.names.append(row[0])
-            data.times.append(time)
-            data.longitudes.append(float(row[2]))
-            data.latitudes.append(float(row[3]))
-            data.magnitudes.append(float(row[4]))
-            data.depths.append(float(row[5]))
-            data.location_descriptions.append(row[6])
-
-    data.longitudes = np.array(data.longitudes)
-    data.latitudes = np.array(data.latitudes)
-    data.magnitudes = np.array(data.magnitudes)
-    data.depths = np.array(data.depths)
-
+            data.add_entry(
+                name=row[0],
+                time=time,
+                longitude=float(row[2]),
+                latitude=float(row[3]),
+                magnitude=float(row[4]),
+                depth=float(row[5]),
+                location_description=row[6])
+            
     return data
 
 
@@ -102,6 +139,10 @@ def read_data(file_name, begin_time, end_time):
 Path("./outputs/").mkdir(parents=True, exist_ok=True)
 
 data = read_data("data/20240423_0605.csv", "2024-04-03 07:58:00", "2025-04-03 07:58:00")
+
+# Exclude earthquakes on the west side of Taiwan
+data.remove_entries_by(longitude_range=(0.0, 120.45), latitude_range=(0.0, 90.0))
+
 data.process()
 
 fig = plt.figure(figsize=(12, 5))
@@ -109,7 +150,7 @@ ax = fig.add_subplot()
 ax.bar(
     data.times, 
     data.magnitudes,
-    width=0.0075,
+    width=0.01,
     alpha=0.5,
     color=np.where(data.magnitudes >= 5, 'r', np.where(data.magnitudes < 4, 'b', 'g')))
 ax.set_xlabel("Time")
