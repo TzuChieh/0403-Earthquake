@@ -14,11 +14,22 @@ mainshock_time = datetime.strptime("2024-04-03 07:58:09", time_format)
 # Use a non-interactive backend so plot window will not pop out
 matplotlib.use('Agg')
 
+
 def magnitude_to_energy(magnitude):
     return 10.0 ** (4.8 + 1.5 * magnitude)
 
 def energy_to_magnitude(energy):
-    return (np.log10(energy) - 4.8) / 1.5
+    # To prevent log(0)
+    epsilon = 1e-14
+    return (np.log10(energy + epsilon) - 4.8) / 1.5
+
+def make_time_range(begin_time, end_time, step_time):
+    times = []
+    while begin_time < end_time:
+        times.append(begin_time)
+        begin_time += step_time
+    return times
+
 
 class EarthquakeData:
     def __init__(self):
@@ -41,24 +52,29 @@ class EarthquakeData:
         self.depths = np.array(self.depths)
 
         # Calculate running average of earthquake counts
+        one_hour = timedelta(hours=1)
         avg_hours = 4.0
-        half_hours = timedelta(hours=avg_hours / 2)
-        self.counts = []
-        for time in self.times:
-            self.counts.append(self.count(time - half_hours, time + half_hours) / avg_hours)
+        half_avg_hours = timedelta(hours=avg_hours / 2)
+        self.time_and_counts = []
+        for time in make_time_range(self.times[-1], self.times[0] + one_hour, one_hour):
+            avg_count = self.count(time - half_avg_hours, time + half_avg_hours) / avg_hours
+            self.time_and_counts.append((time, avg_count))
 
         # Calculate energy release amount in time slot
-        self.summed_magnitudes = []
-        for time in self.times:
-            e = self.energy(time - half_hours, time + half_hours)
-            self.summed_magnitudes.append(energy_to_magnitude(e))
+        self.time_and_summed_magnitudes = []
+        for time in make_time_range(self.times[-1], self.times[0] + one_hour, one_hour):
+            e = self.energy(time - half_avg_hours, time + half_avg_hours)
+            m = energy_to_magnitude(e)
+            if m > 0.0:
+                self.time_and_summed_magnitudes.append((time, m))
 
         # Calculate cumulative energy release amount
-        total_energy = 0.0
+        total_e = 0.0
         self.cumulative_magnitudes = []
         for magnitude in reversed(self.magnitudes):
-            total_energy += magnitude_to_energy(magnitude)
-            self.cumulative_magnitudes.insert(0, energy_to_magnitude(total_energy))
+            total_e += magnitude_to_energy(magnitude)
+            m = energy_to_magnitude(total_e)
+            self.cumulative_magnitudes.insert(0, m)
 
     def count(self, begin_time, end_time):
         """
@@ -162,20 +178,20 @@ plt.clf()
 fig = plt.figure(figsize=(12, 5))
 ax = fig.add_subplot()
 ax.plot(
-    data.times, 
-    data.counts)
+    [tc[0] for tc in data.time_and_counts], 
+    [tc[1] for tc in data.time_and_counts])
 ax.set_xlabel("Time")
 ax.set_ylabel("Counts (4 hours mean)")
 ax.grid()
 plt.savefig(Path("./outputs/count_t.png"))
 plt.clf()
 
-hours_after_mainshock = [(t - mainshock_time).total_seconds() / 3600.0 for t in data.times]
+hours_after_mainshock = [(t - mainshock_time).total_seconds() / 3600.0 for t in [tc[0] for tc in data.time_and_counts]]
 fig = plt.figure(figsize=(12, 5))
 ax = fig.add_subplot()
 ax.plot(
     hours_after_mainshock, 
-    data.counts)
+    [tc[1] for tc in data.time_and_counts])
 ax.set_xlabel("Hours after mainshock (log scale)")
 ax.set_ylabel("Counts (4 hours mean, log scale)")
 ax.set_xscale('log', base=10)
@@ -188,8 +204,8 @@ plt.clf()
 fig = plt.figure(figsize=(12, 5))
 ax = fig.add_subplot()
 ax.plot(
-    data.times, 
-    data.summed_magnitudes)
+    [tc[0] for tc in data.time_and_summed_magnitudes],
+    [tc[1] for tc in data.time_and_summed_magnitudes])
 ax.set_xlabel("Time")
 ax.set_ylabel("Energy Release")
 ax.grid()
