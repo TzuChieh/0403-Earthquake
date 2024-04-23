@@ -150,7 +150,7 @@ ax = fig.add_subplot()
 ax.bar(
     data.times, 
     data.magnitudes,
-    width=0.01,
+    width=0.01 * data.magnitudes,
     alpha=0.5,
     color=np.where(data.magnitudes >= 5, 'r', np.where(data.magnitudes < 4, 'b', 'g')))
 ax.set_xlabel("Time")
