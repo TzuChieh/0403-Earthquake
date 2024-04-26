@@ -154,7 +154,7 @@ def read_data(file_name, begin_time, end_time):
 # Creates output directory (this won't be tracked)
 Path("./outputs/").mkdir(parents=True, exist_ok=True)
 
-data = read_data("data/20240423_0605.csv", "2024-04-03 07:58:00", "2025-04-03 07:58:00")
+data = read_data("data/20240427_0320.csv", "2024-04-03 07:58:00", "2025-04-03 07:58:00")
 
 # Exclude earthquakes on the west side of Taiwan
 data.remove_entries_by(longitude_range=(0.0, 120.45), latitude_range=(0.0, 90.0))
